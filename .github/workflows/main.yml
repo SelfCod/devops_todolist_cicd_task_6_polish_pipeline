@@ -39,8 +39,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', github.event.inputs.python_version)) || fromJson('["3.8", "3.9"]') }}
-        os: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', github.event.inputs.os_type)) || fromJson('["ubuntu-latest", "windows-latest"]') }}
+        python-version: ["3.8", "3.9"]
+        os: ["ubuntu-latest", "windows-latest"]
 
     runs-on: ${{ matrix.os }}
     name: CI Python ${{ matrix.python-version }}, ${{ matrix.os }}
@@ -81,10 +81,17 @@ jobs:
           flake8 . --exit-zero --max-complexity=6
 
       - name: Upload python artifacts
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name != 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: python-artifacts-${{ matrix.python-version }}-${{ matrix.os }}
+          path: .
+
+      - name: Upload python artifacts workflow_dispatch
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-artifacts-${{ inputs.python_version }}-${{ inputs.os_type }}
           path: .
 
   upload-other-artifacts:
@@ -114,7 +121,7 @@ jobs:
     - uses: actions/download-artifact@v4
       name: Download python artifacts
       with:
-        name: python-artifacts-*
+        name: python-artifacts-${{ inputs.python_version }}-${{ inputs.os_type }}
         path: .
 
     - name: Login to Docker Hub
