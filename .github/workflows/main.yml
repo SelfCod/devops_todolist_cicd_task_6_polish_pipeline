@@ -43,7 +43,7 @@ jobs:
         os: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', github.event.inputs.os_type)) || fromJson('["ubuntu-latest", "windows-latest"]') }}
 
     runs-on: ${{ matrix.os }}
-    name: Python CI
+    name: CI Python ${{ matrix.python-version }}, ${{ matrix.os }}
     defaults:
       run:
         working-directory: ./src
