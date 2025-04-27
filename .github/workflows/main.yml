@@ -34,7 +34,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DockerImageName: mkostiuk98/todoapp
+  DockerImageName: urapikh/todoapp
 
 jobs:
   python-ci:
@@ -118,7 +118,7 @@ jobs:
         with:
           push: true
           context: ./src
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DockerImageName }}:${{ github.sha }}
+          tags: ${{ env.DockerImageName }}:${{ github.sha }}
 
   helm-ci:
     name: Helm CI
@@ -162,7 +162,7 @@ jobs:
       artifact-name: python-artifacts-${{ github.event.inputs.artifact }}
       helm-artifact-name: helm-package
       kind-artifact-name: kind-cluster-${{ github.event.inputs.artifact }}
-      DockerImageName: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DockerImageName }}
+      DockerImageName: ${{ env.DockerImageName }}
 
   deploy-helm-stg:
     name: Deploy helm to Staging
@@ -178,4 +178,4 @@ jobs:
       artifact-name: python-artifacts-${{ github.event.inputs.artifact }}
       helm-artifact-name: helm-package
       kind-artifact-name: kind-cluster-${{ github.event.inputs.artifact }}
-      DockerImageName: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DockerImageName }}
+      DockerImageName: ${{ env.DockerImageName }}
