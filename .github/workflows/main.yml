@@ -1,31 +1,58 @@
-name: python-deployment
+name: Python CI
 
-run-name: ${{ github.actor }} - ${{ github.ref_name}} -${{ github.sha }}
+run-name: ${{ github.actor }} - ${{ github.ref_name }} - ${{ github.sha }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 on:
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      python_version:
+        description: 'Python version to run'
+        required: true
+        type: choice
+        options:
+          - '3.8'
+          - '3.9'
+        default: '3.8'
+      os_type:
+        description: 'Operating system to run on'
+        required: true
+        type: choice
+        options:
+          - 'ubuntu-latest'
+          - 'windows-latest'
+        default: 'ubuntu-latest'
 
 env:
-  PythonVersion: 3.8
   DockerImageName: todoapp
 
 jobs:
   python-ci:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./src
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', github.event.inputs.python_version)) || fromJson('["3.8", "3.9"]') }}
+        os: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', github.event.inputs.os_type)) || fromJson('["ubuntu-latest", "windows-latest"]') }}
+
+    runs-on: ${{ matrix.os }}
+    name: CI (Python ${{ matrix.python-version }}, ${{ matrix.os }})
+
     steps:
-      - name: Checkout
+      - name: Checkout repository code
         uses: actions/checkout@v4
 
-      - name: Set up Python ${{ env.PythonVersion }}
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.PythonVersion }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
