@@ -35,6 +35,11 @@ on:
         required: true
         type: choice
         options: ['windows-3.8', 'windows-3.9', 'ubuntu-3.8', 'ubuntu-3.9']
+      dockerhub_username:
+        description: 'Docker Hub Username'
+        required: true
+        type: string
+        default: ${{ secrets.DOCKERHUB_USERNAME }}
 
 env:
   DockerImageName: todoapp
@@ -173,7 +178,7 @@ jobs:
       artifact-name: python-artifacts-${{ github.event.inputs.artifact }}
       helm-artifact-name: helm-package
       kind-artifact-name: kind-cluster-${{ github.event.inputs.artifact }}
-      DockerImageName: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DockerImageName }}
+      DockerImageName: ${{ github.event.inputs.dockerhub_username }}/${{ env.DockerImageName }}
 
   deploy-helm-stg:
     name: Deploy helm to Staging
@@ -189,4 +194,4 @@ jobs:
       artifact-name: python-artifacts-${{ github.event.inputs.artifact }}
       helm-artifact-name: helm-package
       kind-artifact-name: kind-cluster-${{ github.event.inputs.artifact }}
-      DockerImageName: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DockerImageName }}
+      DockerImageName: ${{ github.event.inputs.dockerhub_username }}/${{ env.DockerImageName }}
